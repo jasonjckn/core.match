@@ -128,7 +128,10 @@
     (.valAt this k not-found)))
 
 (defn val-at*
-  ([m k] (val-at m k nil))
+  ([m k] (let [val (val-at m k ::not-found)]
+           (if (= val ::not-found)
+             (throw backtrack)
+             val)))
   ([m k not-found] (val-at m k not-found)))
 
 (defn val-at-expr [& args]
