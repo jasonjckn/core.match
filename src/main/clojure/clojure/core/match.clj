@@ -1655,4 +1655,24 @@
   (let [bindvars# (take-nth 2 bindings)]
     `(let ~bindings
        (match [~@bindvars#]
-         ~@body))))
+              ~@body))))
+
+(defmacro match-> [x & clauses]
+  {:pre [(even? (count clauses))]}  
+  (let [clauses-2 (partition 2 clauses)
+
+        [last0 last1] (last clauses-2)
+
+        clauses-2$ (concat clauses-2
+                           (if (= last0 :else) []
+                               [[:else `(identity)]]))
+        s (gensym)]
+    `(let [~s ~x]
+       (match
+        ~s
+        ~@(apply concat
+                 (for [[pattern action] clauses-2$]
+                   [pattern
+                    `(-> ~s
+                         ~action)]))))))
+
