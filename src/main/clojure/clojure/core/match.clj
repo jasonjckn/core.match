@@ -288,8 +288,8 @@
                      (conj bindings [sym bind-expr])
                      bindings)
           bindings (if (named-wildcard-pattern? p)
-                       (conj bindings [(sym p) bind-expr])
-                       bindings)]
+                         (conj bindings [(sym p) bind-expr])
+                         bindings)]
       (PatternRow. (drop-nth ps n) action
                    bindings)))
   IVecMod
@@ -834,8 +834,10 @@
 (defn ^WildcardPattern wildcard-pattern
   ([] (WildcardPattern. '_ nil))
   ([sym] 
-   {:pre [(symbol? sym)]}
-   (WildcardPattern. sym nil)))
+     {:pre [(symbol? sym)]}
+     (if (= sym '_)
+       (WildcardPattern. (gensym) nil)
+       (WildcardPattern. sym nil))))
 
 (defn wildcard-pattern? [x]
   (instance? WildcardPattern x))
@@ -996,7 +998,9 @@
   (to-source* [this ocr]
     (if *clojurescript*
       `(or (satisfies? cljs.core.ILookup ~ocr))
-      `(or (instance? clojure.lang.ILookup ~ocr) (satisfies? IMatchLookup ~ocr))))
+      `(or
+        (instance? clojure.lang.ILookup ~ocr)
+        (satisfies? IMatchLookup ~ocr))))
   Object
   (toString [_]
     (str m " :only " (or (:only _meta) [])))
